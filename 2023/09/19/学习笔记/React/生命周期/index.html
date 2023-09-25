@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content=""/><meta name="keyword"/><title>MoJo Monkey
+-
+
+</title><link rel="icon" href="/img/favicon.ico"/>
+<link rel="stylesheet" href="/MoJi-Monkey/css/style.css">
+
+<link rel="stylesheet" href="/MoJi-Monkey/css/helpers.css">
+<script async="async" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading-wrapper" data-loading="true"><div class="loading"><span></span><span></span><span></span></div></div><div class="page" data-filter="true"><div class="head" data-show="true"><header class="head-header"><div class="head-author"><a class="head-author-link" href="/MoJi-Monkey/">MoJo Monkey</a></div><div class="head-right"><button class="bar-wrap" id="bar-wrap-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><div class="head-item"><a class="search-button head-item-link"><i class="icon icon-search"></i></a></div><div class="head-item"><a class="head-item-link" href="/MoJi-Monkey/about">About</a></div></div></header>
+<div class="menu-bar-head" id="menu-bar" data-show="false"><ul class="menu-bar-ul"><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts/"><span>Posts1</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts2/"><span>Posts2</span></a></li><li class="menu-bar-item  border"><a href="/MoJi-Monkey/archives"><span>Archives</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/tags"><span>Tags</span></a></li><li class="menu-bar-item"><a class="search-button"><span>Search</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/about"><span>About</span></a></li></ul></div></div><div class="main"><article class="post" id="post"><header class="post-head"><h1 class="post-title"><a class="title" href="/MoJi-Monkey/2023/09/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/React/%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">生命周期</a></h1></header><div class="post-datetag"><div class="post-date"><time class="post-time" itemprop="datePublished" title="2023-09-19 19:04:53" datetime="2023-09-19T11:04:53.000Z">2023-09-19</time></div>|<div class="post-tag"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/react/" rel="tag">react</a></li></ul></div>|
+<div class="post-visit"><span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>hits</span></div></div><div class="post-word-count">本文共681字。</div><div class="article-entry" itemprop="articleBody"><p>主要为3个阶段</p>
+<h2 id="1-1-挂载阶段"><a href="#1-1-挂载阶段" class="headerlink" title="1.1. 挂载阶段"></a>1.1. 挂载阶段</h2><ul>
+<li>constructor  &#x2F;&#x2F; 构造函数</li>
+<li>componentWillMount &#x2F;&#x2F; 组件将要渲染<ul>
+<li>在16.x之后的版本， 变更为 getDerivedStateFromProps</li>
+</ul>
+</li>
+<li>render &#x2F;&#x2F; 渲染</li>
+<li>componentDidMount &#x2F;&#x2F; 组件渲染完成</li>
+</ul>
+<h2 id="1-2-更新阶段"><a href="#1-2-更新阶段" class="headerlink" title="1.2. 更新阶段"></a>1.2. 更新阶段</h2><ul>
+<li>componentWillReceiveProps &#x2F;&#x2F; 组件将要接收新属性   newProps<ul>
+<li>在16.x之后的版本， 变更为 getDerivedStateFromProps</li>
+</ul>
+</li>
+<li>shouldComponentUpdate &#x2F;&#x2F; 判断组件是否要更新</li>
+<li>componentWillUpdate &#x2F;&#x2F; 组件将要更新</li>
+<li>render &#x2F;&#x2F; 渲染</li>
+<li>getSnapshotBeforeUpdate &#x2F;&#x2F; 组件更新前获取快照<ul>
+<li>16.x后新增加的，之前没有</li>
+</ul>
+</li>
+<li>componentDidMount &#x2F;&#x2F; 组件渲染完成</li>
+</ul>
+<h2 id="1-3-卸载阶段"><a href="#1-3-卸载阶段" class="headerlink" title="1.3. 卸载阶段"></a>1.3. 卸载阶段</h2><ul>
+<li>componentWillUnmount &#x2F;&#x2F; 组件将要卸载</li>
+</ul>
+<h2 id="1-4。-getDerivedStateFromProps"><a href="#1-4。-getDerivedStateFromProps" class="headerlink" title="1.4。 getDerivedStateFromProps"></a>1.4。 getDerivedStateFromProps</h2><p>这是一个静态方法，代替了原来的componentWillReceiveProps，主要是监听props的变化，从而对state进行更新</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="title function_">getDerivedStateFromProps</span>(<span class="params">nextProps, prevState</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123;type&#125; = newProps;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回null， 意思是不进行任何操作，所以也不更新</span></span><br><span class="line">    <span class="keyword">if</span>(type === prevState.<span class="property">type</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 返回一个对象， 会和state进行合并</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="1-5-getSnapshotBeforeUpdate"><a href="#1-5-getSnapshotBeforeUpdate" class="headerlink" title="1.5. getSnapshotBeforeUpdate"></a>1.5. getSnapshotBeforeUpdate</h2><p>getSnapshotBeforeUpdate 是在render之后，DOM变更前调用，返回值作为componentDidUpdate的第三个参数，需要渲染期间进行干预的时候，可以使用这个方法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title function_">getSnapshotBeforeUpdate</span>(<span class="params">prevProps, prevState</span>) &#123;</span><br><span class="line">    <span class="comment">// 返回一个值， 会作为componentDidUpdate的第三个参数</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">123</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">componentDidUpdate</span>(<span class="params">prevProps, prevState, snapshot</span>) &#123;</span><br><span class="line">   <span class="variable language_">console</span>.<span class="title function_">log</span>(snapshot); <span class="comment">// 123    </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="2-更新背景原因"><a href="#2-更新背景原因" class="headerlink" title="2. 更新背景原因"></a>2. 更新背景原因</h1><p>以往，componentWillUpdate 是在render之前调用，但是在这个时候，DOM还没有更新，所以无法获取到DOM的信息，如果想要获取DOM的信息，需要在componentDidUpdate中获取，但是这个时候，DOM已经更新了，所以无法获取到之前的DOM信息，这个时候就需要getSnapshotBeforeUpdate来获取DOM信息了</p>
+<p>尤其是react后面的异步渲染，渲染被分为了多次完成，甚至可以暂停、回溯。<br>所以，还在用原来的方法，就会让执行流程变长，中间用户可能还会有别的操作，从而打断了执行流程，导致出错</p>
+<p>除此以外， getSnapshotBeforeUpdate 的调用结果会作第三个参数参入componentDidUpdate, 避免了原来方法在使用上，组件临时状态的数据，在组件实例上的浪费。</p>
+<p>并且getSnapshotBeforeUpdate, 返回的数据，用完即被销毁。</p>
+<h1 id="3-被删除的生命周期"><a href="#3-被删除的生命周期" class="headerlink" title="3. 被删除的生命周期"></a>3. 被删除的生命周期</h1><ol>
+<li>componentWillMount</li>
+<li>componentWillReceiveProps</li>
+<li>componentWillUpdate</li>
+</ol>
+<p>想要继续使用，需要加上 <code>UNSAFE_</code> 前缀</p>
+<h1 id="3-1-componentWillMount"><a href="#3-1-componentWillMount" class="headerlink" title="3.1 componentWillMount"></a>3.1 componentWillMount</h1><p>移除的原因，是因为在一部渲染机制中，允许组件进行中断停止等操作，会导致单个组件 componentWillMount 调用多次，从而导致不可预测的结果。<br>因为，很多时间的绑定，异步请求会卸载这里。从而发生多次调用</p>
+<h1 id="3-2-componentWillDidUpdate"><a href="#3-2-componentWillDidUpdate" class="headerlink" title="3.2 componentWillDidUpdate"></a>3.2 componentWillDidUpdate</h1><p>移除的原因 和添加 getSnapshotBeforeUpdate 一致</p>
+</div></article><aside class="post-widget"><nav class="post-toc-wrap" id="post-toc"><h4>TOC</h4><ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-1-%E6%8C%82%E8%BD%BD%E9%98%B6%E6%AE%B5"><span class="post-toc-number">1.</span> <span class="post-toc-text">1.1. 挂载阶段</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-2-%E6%9B%B4%E6%96%B0%E9%98%B6%E6%AE%B5"><span class="post-toc-number">2.</span> <span class="post-toc-text">1.2. 更新阶段</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-3-%E5%8D%B8%E8%BD%BD%E9%98%B6%E6%AE%B5"><span class="post-toc-number">3.</span> <span class="post-toc-text">1.3. 卸载阶段</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-4%E3%80%82-getDerivedStateFromProps"><span class="post-toc-number">4.</span> <span class="post-toc-text">1.4。 getDerivedStateFromProps</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-5-getSnapshotBeforeUpdate"><span class="post-toc-number">5.</span> <span class="post-toc-text">1.5. getSnapshotBeforeUpdate</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#2-%E6%9B%B4%E6%96%B0%E8%83%8C%E6%99%AF%E5%8E%9F%E5%9B%A0"><span class="post-toc-number"></span> <span class="post-toc-text">2. 更新背景原因</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#3-%E8%A2%AB%E5%88%A0%E9%99%A4%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="post-toc-number"></span> <span class="post-toc-text">3. 被删除的生命周期</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#3-1-componentWillMount"><span class="post-toc-number"></span> <span class="post-toc-text">3.1 componentWillMount</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#3-2-componentWillDidUpdate"><span class="post-toc-number"></span> <span class="post-toc-text">3.2 componentWillDidUpdate</span></a></nav></aside></div><footer class="footer-nav"><div class="footer"><div class="back-top" id="back-top" title="Back to top"><i class="icon icon-chevron-bar-up"></i></div><span class="footer-msg"><div><span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">?</span>
+PV
+</span><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">?</span>
+UV</span></div>
+
+Copyright &copy;
+<span class="time-divide">-</span>2023
+Belial.
+
+Power by
+<a href="https://hexo.io/" target="_blank" rel="external nofollow">Hexo</a>
+and
+<a href="https://github.com/Cerallin/hexo-theme-yuzu" target="_blank" rel="external nofollow" title="v3.1">Theme Yuzu</a>.</span></div></footer><script>window.config = {
+  url_root: '/MoJi-Monkey/',
+  meta_path: 'meta.json',
+};
+</script>
+<script src="/MoJi-Monkey/js/clipboard/clipboard.min.js"></script>
+
+
+<script src="/MoJi-Monkey/js/theme.js"></script>
+
+
+<script src="/MoJi-Monkey/js/index.js"></script>
+
+<script src="/MoJi-Monkey/js/toc.js"></script>
+</div><div class="search-modal" id="search-modal" data-show="false"><div class="card"><div class="card-head"><div class="search-box"><input class="search-input" id="search-input" placeholder="search"/><div class="search-button" id="search-button"><div class="icon icon-search"></div></div></div><div class="close-button"><div class="icon icon-x"></div></div></div><div class="card-body"><div class="search-count">search.total<span id="search-count-num">0</span>search result(s) in total.</div><div class="search-result" id="search-result"></div></div></div></div></body></html>

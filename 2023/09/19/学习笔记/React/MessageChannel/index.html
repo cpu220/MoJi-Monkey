@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content=""/><meta name="keyword"/><title>MoJo Monkey
+-
+
+</title><link rel="icon" href="/img/favicon.ico"/>
+<link rel="stylesheet" href="/MoJi-Monkey/css/style.css">
+
+<link rel="stylesheet" href="/MoJi-Monkey/css/helpers.css">
+<script async="async" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading-wrapper" data-loading="true"><div class="loading"><span></span><span></span><span></span></div></div><div class="page" data-filter="true"><div class="head" data-show="true"><header class="head-header"><div class="head-author"><a class="head-author-link" href="/MoJi-Monkey/">MoJo Monkey</a></div><div class="head-right"><button class="bar-wrap" id="bar-wrap-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><div class="head-item"><a class="search-button head-item-link"><i class="icon icon-search"></i></a></div><div class="head-item"><a class="head-item-link" href="/MoJi-Monkey/about">About</a></div></div></header>
+<div class="menu-bar-head" id="menu-bar" data-show="false"><ul class="menu-bar-ul"><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts/"><span>Posts1</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts2/"><span>Posts2</span></a></li><li class="menu-bar-item  border"><a href="/MoJi-Monkey/archives"><span>Archives</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/tags"><span>Tags</span></a></li><li class="menu-bar-item"><a class="search-button"><span>Search</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/about"><span>About</span></a></li></ul></div></div><div class="main"><article class="post" id="post"><header class="post-head"><h1 class="post-title"><a class="title" href="/MoJi-Monkey/2023/09/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/React/MessageChannel/">Message Channel</a></h1></header><div class="post-datetag"><div class="post-date"><time class="post-time" itemprop="datePublished" title="2023-09-19 19:04:53" datetime="2023-09-19T11:04:53.000Z">2023-09-19</time></div>|<div class="post-tag"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/react/" rel="tag">react</a></li></ul></div>|
+<div class="post-visit"><span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>hits</span></div></div><div class="post-word-count">本文共875字。</div><div class="article-entry" itemprop="articleBody"><h1 id="Message-Channel"><a href="#Message-Channel" class="headerlink" title="Message Channel"></a>Message Channel</h1><h2 id="事件循环"><a href="#事件循环" class="headerlink" title="事件循环"></a>事件循环</h2><p>事件循环的机制就是每循环一次，会从任务队列中取出一个任务来执行，如果还没有达到浏览器需要重新渲染的时间(16ms),那么久继续循环一次，从任务队列里面再取一个任务来执行，以此类推，直到浏览器需要重新渲染，这个时候就会执行重新渲染的任务，执行完毕后，回到之前的流程。</p>
+<blockquote>
+<p>需要注意的是 requestAnimationFrame API是在每次重新 渲染之前执行的。这个API的出现，就是专门用来做动画的。</p>
+</blockquote>
+<h2 id="MessageChannel接口"><a href="#MessageChannel接口" class="headerlink" title="MessageChannel接口"></a>MessageChannel接口</h2><p>这其实是一个用来做消息通讯的接口，用来进行跨线程通讯，也就是说可以在不同的线程之间传递数据。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">id</span>=<span class="string">&quot;content&quot;</span> <span class="attr">placeholder</span>=<span class="string">&quot;请输入消息&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">&quot;btn1&quot;</span>&gt;</span>给 port1 发消息<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">&quot;btn2&quot;</span>&gt;</span>给 port2 发消息<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> channel = <span class="keyword">new</span> <span class="title class_">MessageChannel</span>();</span><br><span class="line"><span class="comment">// 两个信息端口，这两个信息端口可以进行信息的通信</span></span><br><span class="line"><span class="keyword">const</span> port1 = channel.<span class="property">port1</span>;</span><br><span class="line"><span class="keyword">const</span> port2 = channel.<span class="property">port2</span>;</span><br><span class="line">btn1.<span class="property">onclick</span> = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">  <span class="comment">// 给 port1 发消息</span></span><br><span class="line">  <span class="comment">// 那么这个信息就应该由 port2 来进行发送</span></span><br><span class="line">  port2.<span class="title function_">postMessage</span>(content.<span class="property">value</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// port1 需要监听发送给自己的消息</span></span><br><span class="line">port1.<span class="property">onmessage</span> = <span class="keyword">function</span>(<span class="params">event</span>)&#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`port1 收到了来自 port2 的消息：<span class="subst">$&#123;event.data&#125;</span>`</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">btn2.<span class="property">onclick</span> = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">  <span class="comment">// 给 port2 发消息</span></span><br><span class="line">  <span class="comment">// 那么这个信息就应该由 port1 来进行发送</span></span><br><span class="line">  port1.<span class="title function_">postMessage</span>(content.<span class="property">value</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// port2 需要监听发送给自己的消息</span></span><br><span class="line">port2.<span class="property">onmessage</span> = <span class="keyword">function</span>(<span class="params">event</span>)&#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`port2 收到了来自 port1 的消息：<span class="subst">$&#123;event.data&#125;</span>`</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>任务调度需要满足两个条件：</p>
+<ol>
+<li>JS暂停，将主线程还给浏览器，让浏览器能够有序的重新渲染页面</li>
+<li>暂停了的JS（也就是还有任务没有执行完），需要再下一次接着来执行<ol>
+<li>浏览器内部有机制来估计每一帧的剩余时间，从而来决定是否调用 requestIdleCallback，如果callback执行时间过长，那么就会获取option里的timeout，强制执行callback。如果没有timeout，那么浏览器会等待下一个空暇你时间来执行callback，将当前js暂停。</li>
+</ol>
+</li>
+</ol>
+<p>根据上面的描述，就是利用事件循环，将没有执行完的js放入到任务队列，下一次事件循环的时候再取出执行。所以就需要产生一个任务（宏任务）</p>
+<blockquote>
+<p>为什么不适用setTimeOut？<br>因为setTimeOut 在嵌套超过5层，timeout如果小于4ms，会强制为4ms<br>本来一帧就只有16ms， 这就少了1&#x2F;4</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">let count = 0; // 计数器</span><br><span class="line">let startTime = new Date(); // 获取当前的时间戳</span><br><span class="line">console.log(&quot;start time:&quot;, 0, 0);</span><br><span class="line">function fn()&#123;</span><br><span class="line">  setTimeout(function()&#123;</span><br><span class="line">    console.log(&quot;exec time:&quot;, ++count, new Date() - startTime);</span><br><span class="line">    if(count === 50)&#123;</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line">    fn();</span><br><span class="line">  &#125;,0)</span><br><span class="line">&#125;</span><br><span class="line">fn();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>为什么不选择 requestAnimationFrame？</p>
+<ol>
+<li>因为这个只能在重新渲染之前，才能够执行一次。如果把它包装成一个任务，放到任务队列中。只要没到重新渲染的时间，就可以一直从任务队列里面获取任务执行。</li>
+<li>兼容问题</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>为什么没有选择包装成一个微任务？<br>因为微任务会在清空整个队列后，才会结束。所以在页面更新前会一直执行，直到队列被清空。 （微任务优先级最高）</p>
+</blockquote>
+</div></article><aside class="post-widget"><nav class="post-toc-wrap" id="post-toc"><h4>TOC</h4><ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Message-Channel"><span class="post-toc-number">1.</span> <span class="post-toc-text">Message Channel</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">事件循环</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#MessageChannel%E6%8E%A5%E5%8F%A3"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">MessageChannel接口</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Scheduler"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">Scheduler</span></a></li></ol></li></ol></nav></aside></div><footer class="footer-nav"><div class="footer"><div class="back-top" id="back-top" title="Back to top"><i class="icon icon-chevron-bar-up"></i></div><span class="footer-msg"><div><span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">?</span>
+PV
+</span><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">?</span>
+UV</span></div>
+
+Copyright &copy;
+<span class="time-divide">-</span>2023
+Belial.
+
+Power by
+<a href="https://hexo.io/" target="_blank" rel="external nofollow">Hexo</a>
+and
+<a href="https://github.com/Cerallin/hexo-theme-yuzu" target="_blank" rel="external nofollow" title="v3.1">Theme Yuzu</a>.</span></div></footer><script>window.config = {
+  url_root: '/MoJi-Monkey/',
+  meta_path: 'meta.json',
+};
+</script>
+<script src="/MoJi-Monkey/js/clipboard/clipboard.min.js"></script>
+
+
+<script src="/MoJi-Monkey/js/theme.js"></script>
+
+
+<script src="/MoJi-Monkey/js/index.js"></script>
+
+<script src="/MoJi-Monkey/js/toc.js"></script>
+</div><div class="search-modal" id="search-modal" data-show="false"><div class="card"><div class="card-head"><div class="search-box"><input class="search-input" id="search-input" placeholder="search"/><div class="search-button" id="search-button"><div class="icon icon-search"></div></div></div><div class="close-button"><div class="icon icon-x"></div></div></div><div class="card-body"><div class="search-count">search.total<span id="search-count-num">0</span>search result(s) in total.</div><div class="search-result" id="search-result"></div></div></div></div></body></html>

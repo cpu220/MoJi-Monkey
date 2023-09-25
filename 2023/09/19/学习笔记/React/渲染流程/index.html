@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content=""/><meta name="keyword"/><title>MoJo Monkey
+-
+
+</title><link rel="icon" href="/img/favicon.ico"/>
+<link rel="stylesheet" href="/MoJi-Monkey/css/style.css">
+
+<link rel="stylesheet" href="/MoJi-Monkey/css/helpers.css">
+<script async="async" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading-wrapper" data-loading="true"><div class="loading"><span></span><span></span><span></span></div></div><div class="page" data-filter="true"><div class="head" data-show="true"><header class="head-header"><div class="head-author"><a class="head-author-link" href="/MoJi-Monkey/">MoJo Monkey</a></div><div class="head-right"><button class="bar-wrap" id="bar-wrap-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><div class="head-item"><a class="search-button head-item-link"><i class="icon icon-search"></i></a></div><div class="head-item"><a class="head-item-link" href="/MoJi-Monkey/about">About</a></div></div></header>
+<div class="menu-bar-head" id="menu-bar" data-show="false"><ul class="menu-bar-ul"><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts/"><span>Posts1</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts2/"><span>Posts2</span></a></li><li class="menu-bar-item  border"><a href="/MoJi-Monkey/archives"><span>Archives</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/tags"><span>Tags</span></a></li><li class="menu-bar-item"><a class="search-button"><span>Search</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/about"><span>About</span></a></li></ul></div></div><div class="main"><article class="post" id="post"><header class="post-head"><h1 class="post-title"><a class="title" href="/MoJi-Monkey/2023/09/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/React/%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B/">React 渲染流程</a></h1></header><div class="post-datetag"><div class="post-date"><time class="post-time" itemprop="datePublished" title="2023-09-19 19:04:53" datetime="2023-09-19T11:04:53.000Z">2023-09-19</time></div>|<div class="post-tag"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/react/" rel="tag">react</a></li></ul></div>|
+<div class="post-visit"><span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>hits</span></div></div><div class="post-word-count">本文共2,004字。</div><div class="article-entry" itemprop="articleBody"><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>现代前端框架，都可以总结为一个公式：</p>
+<blockquote>
+<p>ui &#x3D; f(state)</p>
+</blockquote>
+<p>上面的公式还可以进行一个拆分：</p>
+<ul>
+<li>根据自变量（state） 的变化，计算出UI的变化</li>
+<li>根据UI的变化，执行具体的宿主环境的API</li>
+</ul>
+<p>对应的公式：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> state = <span class="title function_">reconcile</span>(udpate);<span class="comment">// 通过reconciler 计算出最新的状态</span></span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">UI</span> = <span class="title function_">commit</span>(state); <span class="comment">// 根据上一步计算出来的state，渲染出UI </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>对应到React里面，就有两大阶段</p>
+<ul>
+<li><p>Render阶段：调合虚拟DOM，计算出最终要渲染出来的虚拟DOM</p>
+<ul>
+<li>Scheduler</li>
+<li>Reconciler</li>
+</ul>
+</li>
+<li><p>commit阶段：根据上一步计算出来的虚拟DOM，渲染具体的UI</p>
+<ul>
+<li>renderer</li>
+</ul>
+</li>
+<li><p>Scheduler(调度器)：调度任务，为任务排序优先级，让优先级高的任务先进入到Reconciler</p>
+</li>
+<li><p>Reconciler(协调器)：生产Fiber对象，收集副作用，找出哪些节点发生了变化，打上不同的flags，diff也是在这个组件中执行</p>
+</li>
+<li><p>renderer（渲染器）：根据协调器计算出来的虚拟DOM，【同步】的渲染节点到视图上。</p>
+</li>
+</ul>
+<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> ()=&gt;&#123;</span><br><span class="line">    <span class="keyword">const</span> [count ,updateCount] = <span class="title function_">useState</span>(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="language-xml"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">button</span> <span class="attr">onClick</span>=<span class="string">&#123;</span> ()=&gt;</span> updateCount(count+1)  &#125;&gt;乘以&#123;count&#125;<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">li</span>&gt;</span>&#123;1*count&#125;<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">li</span>&gt;</span>&#123;2*count&#125;<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">li</span>&gt;</span>&#123;3*count&#125;<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>当用户点击按钮时，首先，有scheduler进行任务协调，Render阶段的工作流程是可以随时被以下原因中断：<ul>
+<li>有其他更高优先级的任务需要执行</li>
+<li>当前的time slice 没有剩余的时间</li>
+<li>发生了其他错误，比如浏览器的事件循环被阻塞了</li>
+</ul>
+</li>
+</ul>
+<p>注意，上面Render阶段的工作实在内存中执行的，不会更新宿主环境的UI，因此这个阶段的工作流程呗反复中断，用户也不会看到更新不完整的UI</p>
+<p>当Scheduler跳读完成后，Reconciler开始工作，Reconciler就需要计算出新的UI，最后由Renderer同步进行渲染更新操作。</p>
+<ol>
+<li>Scheduler （接收到更新，开始调度）<ol>
+<li>将count &#x3D; count+1 交给Reconciler</li>
+</ol>
+</li>
+<li>Reconciler （接收到更新，计算更新造成的影响）<ol>
+<li>li-&gt; 0 变为 li-&gt;1</li>
+<li>li-&gt; 0 变为 li-&gt;2</li>
+<li>li-&gt; 0 变为 li-&gt;3</li>
+<li>将计算结果交给renderer</li>
+</ol>
+</li>
+<li>renderer （接收到更新，根据标记执行对应操作）<ol>
+<li>有3个li标记了update，执行更新DOM的操作</li>
+</ol>
+</li>
+</ol>
+<h2 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h2><p>在React 15及以前，采用的stack架构，所有任务只能同步进行，无法被打断，这就导致浏览器可能会出现丢着难得现象，表现出卡顿。为了解决这个问题，所以从v16开始从架构上进行了两大更新</p>
+<ol>
+<li>引入Fiber</li>
+<li>新增Scheduler</li>
+</ol>
+<p>scheduler在浏览器的原生API中，有类似的视线。 RequestIdleCallback</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">callback</span>(<span class="params">IdleDeadline</span>)&#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;当前帧绘制完毕后所剩的时间:&quot;</span>,<span class="title class_">IdleDeadline</span>.<span class="title function_">timeRemaining</span>())</span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">requestIdleCallback</span>(callback )</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">window</span>.<span class="title function_">requestIdleCallback</span>(callback ) </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>React没有使用requestIdleCallback，因为存在兼容性问题，因此React自己实现了一套这样的机制。</p>
+<h2 id="协调器"><a href="#协调器" class="headerlink" title="协调器"></a>协调器</h2><p>协调器是Render阶段的第二阶段工作，类组件或者函数组件本身就是这个阶段被调用的。<br>根据scheduler调度结果的不同，协调器起点可能是不同的。</p>
+<ul>
+<li>preformSyncWorkOnRoot (同步更新流程)</li>
+<li>performConcurrentWorkOnRoot (并发更新流程)</li>
+</ul>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// performSyncWorkOnRoot 会执行该方法</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">workLoopSync</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">while</span>(workInProgress !== <span class="literal">null</span> )&#123;</span><br><span class="line">        <span class="title function_">performUnitOfWork</span>(workInProgress)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// preformConcurrentWorkOnRoot 会指向该方法</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">workLoopConcurrent</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">while</span>(workInProgress !== nulll &amp;&amp; !<span class="title function_">shouldYield</span>())&#123;</span><br><span class="line">        <span class="title function_">performUnitOfWork</span>(workInProgress)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>新的架构是由Fiber（对象）来描述对象结构，最终形成一颗FiberTree，只不过这棵树是通过链表的形式串联在一起。</p>
+<ul>
+<li>workInProgress 代表的是当前的FiberNode</li>
+<li>performUnitOfWork 方法会创建下一个FiberNode，并且会将已创建的FiberNode链接起来（child、sibing，return），从而形成一个链表结构的FiberTree。在创建下一个FiberNode的时候，整体上可以分为两部分,递阶段 和 归阶段</li>
+<li>如果workInProgress为null，说明已经没有下一个FiberNode，也就是说，整颗FiberTree已经构建完毕。</li>
+</ul>
+<blockquote>
+<p>ps：上面两个的唯一区别，就是shouldYield，这个方法表明了是否可以中断。</p>
+</blockquote>
+<h3 id="递-阶段"><a href="#递-阶段" class="headerlink" title="递 阶段"></a>递 阶段</h3><ul>
+<li>遍历原则，深度优先。 从HostRootFiber开始向下遍历，遍历到的每一个FiberNode，执行beginWork方法。根据传入的FiberNode 创建下一级的FiberNode</li>
+</ul>
+<ol>
+<li><p>下一级只有一个元素，beginwork会创建对应的FiberNode，并与workInProgress链接∏</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">li</span>&gt;</span>123<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 对应的FiberNode，LiFiber.return = UlFiber  --&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>下一级有多个元素，这是beginwork方法会依次创建所有的子FiberNode 并且通过sibing连接在一起，每个子FiberNode也会和workInProgress连接</p>
+</li>
+</ol>
+ <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">li</span>&gt;</span>1<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">li</span>&gt;</span>2<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">li</span>&gt;</span>3<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">```      </span><br><span class="line">此时会创建3个li对应的FiberNode，连接情况如下：</span><br><span class="line">```jsx</span><br><span class="line">    Li0Fiber.sibing = L1Fiber;</span><br><span class="line">    Li1Fiber.sibing = L2Fiber;</span><br><span class="line">    Li2Fiber.sibing = L3Fiber;</span><br><span class="line">    // 子Fiber还需要和父Fiber连接</span><br><span class="line">    Li0Fiber.return = UlFiber;</span><br><span class="line">    Li1Fiber.return = UlFiber;</span><br><span class="line">    Li2Fiber.return = UlFiber;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>由于采用的事深度优先原则，因此无法再往下走的时候，就会进入下一个阶段， 【归】阶段</p>
+<h3 id="归-阶段"><a href="#归-阶段" class="headerlink" title="归 阶段"></a>归 阶段</h3><p>这一阶段会调用completeWork方法来处理FiberNode，做一些副作用的收集。<br>当某个FiberNode执行完了complateWork 后，还存在兄弟元素，就会进入兄弟元素的【递】阶段，如果不存在兄弟元素，就会进入父FiberNode的【归】阶段</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// performSyncWorkOnRoot 会执行该方法</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">performUnitOfWork</span>(<span class="params">fiberNode</span>)&#123;</span><br><span class="line">    <span class="comment">// 如果有子元素，就进入下一级</span></span><br><span class="line">    <span class="keyword">if</span>(fiberNode.<span class="property">child</span>)&#123; </span><br><span class="line">    <span class="title function_">performUnitOfWork</span>(fiberNode.<span class="property">child</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果有兄弟元素，则处理兄弟元素</span></span><br><span class="line">    <span class="keyword">if</span>(fiberNode.<span class="property">sibing</span>)&#123;</span><br><span class="line">        <span class="title function_">performUnitOfWork</span>(fiberNode.<span class="property">sibing</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="案例-1"><a href="#案例-1" class="headerlink" title="案例"></a>案例</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>hello<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span>1<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span>2<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span>3<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">ul</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>执行顺序</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="number">1.</span> beginWork (div)</span><br><span class="line"><span class="comment">//  child元素</span></span><br><span class="line"><span class="number">2.</span> beginWork (p)</span><br><span class="line"><span class="number">3.</span> <span class="title function_">complateWork</span>(p)</span><br><span class="line"><span class="comment">// 没有child元素，但有sibing元素</span></span><br><span class="line"><span class="number">4.</span> <span class="title function_">beginwork</span>(ul)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 有child元素</span></span><br><span class="line"><span class="number">5.</span> <span class="title function_">beginWork</span>(li0)</span><br><span class="line"><span class="comment">// 没有子元素</span></span><br><span class="line"><span class="number">6.</span> <span class="title function_">complateWork</span>(li0)</span><br><span class="line"><span class="comment">// 有sibing兄弟元素</span></span><br><span class="line"><span class="number">7.</span> <span class="title function_">beginWork</span>(li1)</span><br><span class="line"><span class="number">8.</span> <span class="title function_">complateWork</span>(li1)</span><br><span class="line"><span class="comment">// 有兄弟元素</span></span><br><span class="line"><span class="number">9.</span> <span class="title function_">beginWork</span>(li2)</span><br><span class="line"><span class="number">10.</span> <span class="title function_">complateWork</span>(li2)</span><br><span class="line"><span class="comment">// 没有子也没有兄弟元素,则回到父元素，</span></span><br><span class="line"><span class="number">11.</span> <span class="title function_">complateWork</span>(ul)</span><br><span class="line"><span class="number">12.</span> <span class="title function_">complateWork</span>(div) </span><br><span class="line"></span><br><span class="line"><span class="comment">// 需要注意的是，文本节点，没有，FiberNode</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><a href="'./img/beginwork.png'"></a></p>
+<h2 id="渲染器"><a href="#渲染器" class="headerlink" title="渲染器"></a>渲染器</h2><p>renderer工作的阶段被称之为 commit阶段。该阶段会将各种副作用commit到宿主环境的UI中。<br>相较于之前的render阶段可以被打断不同，commit阶段一旦开始，就会【同步执行】，直到完成渲染工作。</p>
+<p>整个渲染器渲染过程中可以分为三个子阶段</p>
+<ul>
+<li>BeforeMutation阶段</li>
+<li>Mutation阶段</li>
+<li>Layout阶段</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>react的整体流程可以分为两大阶段，render阶段和commit阶段。</p>
+<ul>
+<li>render阶段里面会经由调度器(Scheduler) 和 协调器（Reconciler）处理，此过程是在内存中运行，是异步可中断的。</li>
+<li>commit阶段会由渲染器（renderer）进行处理，根据副作用进行UI 更新，此过程是同步不可中断的，负责会造成UI和数据不一致</li>
+</ul>
+<h2 id="调度器-1"><a href="#调度器-1" class="headerlink" title="调度器"></a>调度器</h2><p>调度器的主要工作就是调度任务，让所有的任务有优先级的概念，这样的话紧急的任务可以优先执行。</p>
+<p>Scheduler实际上在浏览器的API中是有原生实现的，但IrequestIdleCallback有兼容问题，所以React官方团队自己实现了一个。</p>
+<h2 id="协调器-1"><a href="#协调器-1" class="headerlink" title="协调器"></a>协调器</h2><p>协调器是Render的第二阶段工作。</p>
+<ul>
+<li>该阶段会采用深度优先的原则进行遍历，并且创建对应的FiberNode，并将其串联起来，（child，sibing，return）。</li>
+<li>在遍历时分为了【递】和【归】两个阶段，其中在【递】阶段会执行beginwork方法，该方法会根据传入的FiberNode，创建下一级FiberNode，而【归】阶段则会执行completeWork方法，做一些副作用的收集</li>
+</ul>
+<h2 id="渲染器-1"><a href="#渲染器-1" class="headerlink" title="渲染器"></a>渲染器</h2><p>渲染器的工作就是将各种副作用用（flags表示）commit到宿主环境的UI中。整个阶段可以分为三个阶段，分别是BeforeMutation阶段、Mutation阶段、Layout阶段</p>
+</div></article><aside class="post-widget"><nav class="post-toc-wrap" id="post-toc"><h4>TOC</h4><ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="post-toc-number">1.</span> <span class="post-toc-text">概念</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%A1%88%E4%BE%8B"><span class="post-toc-number">2.</span> <span class="post-toc-text">案例</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="post-toc-number">3.</span> <span class="post-toc-text">调度器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%8D%8F%E8%B0%83%E5%99%A8"><span class="post-toc-number">4.</span> <span class="post-toc-text">协调器</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%80%92-%E9%98%B6%E6%AE%B5"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">递 阶段</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%BD%92-%E9%98%B6%E6%AE%B5"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">归 阶段</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%A1%88%E4%BE%8B-1"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">案例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%B8%B2%E6%9F%93%E5%99%A8"><span class="post-toc-number">5.</span> <span class="post-toc-text">渲染器</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%80%BB%E7%BB%93"><span class="post-toc-number"></span> <span class="post-toc-text">总结</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%B0%83%E5%BA%A6%E5%99%A8-1"><span class="post-toc-number">1.</span> <span class="post-toc-text">调度器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%8D%8F%E8%B0%83%E5%99%A8-1"><span class="post-toc-number">2.</span> <span class="post-toc-text">协调器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%B8%B2%E6%9F%93%E5%99%A8-1"><span class="post-toc-number">3.</span> <span class="post-toc-text">渲染器</span></a></li></ol></nav></aside></div><footer class="footer-nav"><div class="footer"><div class="back-top" id="back-top" title="Back to top"><i class="icon icon-chevron-bar-up"></i></div><span class="footer-msg"><div><span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">?</span>
+PV
+</span><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">?</span>
+UV</span></div>
+
+Copyright &copy;
+<span class="time-divide">-</span>2023
+Belial.
+
+Power by
+<a href="https://hexo.io/" target="_blank" rel="external nofollow">Hexo</a>
+and
+<a href="https://github.com/Cerallin/hexo-theme-yuzu" target="_blank" rel="external nofollow" title="v3.1">Theme Yuzu</a>.</span></div></footer><script>window.config = {
+  url_root: '/MoJi-Monkey/',
+  meta_path: 'meta.json',
+};
+</script>
+<script src="/MoJi-Monkey/js/clipboard/clipboard.min.js"></script>
+
+
+<script src="/MoJi-Monkey/js/theme.js"></script>
+
+
+<script src="/MoJi-Monkey/js/index.js"></script>
+
+<script src="/MoJi-Monkey/js/toc.js"></script>
+</div><div class="search-modal" id="search-modal" data-show="false"><div class="card"><div class="card-head"><div class="search-box"><input class="search-input" id="search-input" placeholder="search"/><div class="search-button" id="search-button"><div class="icon icon-search"></div></div></div><div class="close-button"><div class="icon icon-x"></div></div></div><div class="card-body"><div class="search-count">search.total<span id="search-count-num">0</span>search result(s) in total.</div><div class="search-result" id="search-result"></div></div></div></div></body></html>

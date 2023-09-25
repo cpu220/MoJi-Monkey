@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content=""/><meta name="keyword"/><title>MoJo Monkey
+-
+
+</title><link rel="icon" href="/img/favicon.ico"/>
+<link rel="stylesheet" href="/MoJi-Monkey/css/style.css">
+
+<link rel="stylesheet" href="/MoJi-Monkey/css/helpers.css">
+<script async="async" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading-wrapper" data-loading="true"><div class="loading"><span></span><span></span><span></span></div></div><div class="page" data-filter="true"><div class="head" data-show="true"><header class="head-header"><div class="head-author"><a class="head-author-link" href="/MoJi-Monkey/">MoJo Monkey</a></div><div class="head-right"><button class="bar-wrap" id="bar-wrap-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><div class="head-item"><a class="search-button head-item-link"><i class="icon icon-search"></i></a></div><div class="head-item"><a class="head-item-link" href="/MoJi-Monkey/about">About</a></div></div></header>
+<div class="menu-bar-head" id="menu-bar" data-show="false"><ul class="menu-bar-ul"><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts/"><span>Posts1</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts2/"><span>Posts2</span></a></li><li class="menu-bar-item  border"><a href="/MoJi-Monkey/archives"><span>Archives</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/tags"><span>Tags</span></a></li><li class="menu-bar-item"><a class="search-button"><span>Search</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/about"><span>About</span></a></li></ul></div></div><div class="main"><article class="post" id="post"><header class="post-head"><h1 class="post-title"><a class="title" href="/MoJi-Monkey/2023/09/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/React/%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84/">react整体架构</a></h1></header><div class="post-datetag"><div class="post-date"><time class="post-time" itemprop="datePublished" title="2023-09-19 19:04:53" datetime="2023-09-19T11:04:53.000Z">2023-09-19</time></div>|<div class="post-tag"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/react/" rel="tag">react</a></li></ul></div>|
+<div class="post-visit"><span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>hits</span></div></div><div class="post-word-count">本文共1,743字。</div><div class="article-entry" itemprop="articleBody"><h1 id="react整体架构"><a href="#react整体架构" class="headerlink" title="react整体架构"></a>react整体架构</h1><blockquote>
+<p>Stack 架构在进行虚拟DOM树比较的时候，采用的事递归，计算会消耗大量的时间，新的Fiber架构采用的是链表，可以实现时间切片，防止JS计算占用过多的时间从而导致浏览器出现丢帧的现象</p>
+</blockquote>
+<p>react v15以及之前的架构，称之为 stack 架构，  从V16开始，重构了整体的架构，新的架构被称之为Fiber架构，新的架构想必旧的架构有一个最大的特点，就是能够实现时间切片。</p>
+<h1 id="旧架构的问题"><a href="#旧架构的问题" class="headerlink" title="旧架构的问题"></a>旧架构的问题</h1><blockquote>
+<p>React 是用Javascript构建快速响应的大型web应用程序的首选方式</p>
+</blockquote>
+<p>实际上有两大场景会限制快速响应</p>
+<ol>
+<li>当需要执行大量计算，或者设备本身性能不足的时候，页面就会出现掉帧，卡顿的现象。这个本质上是CPU的瓶颈。</li>
+<li>进行IO操作的时候，需要等待数据返回后，再进行后续操作。等待的过程中，无法快速响应。这种情况实际上是来自于IO的瓶颈</li>
+</ol>
+<h2 id="CPU瓶颈"><a href="#CPU瓶颈" class="headerlink" title="CPU瓶颈"></a>CPU瓶颈</h2><ol>
+<li>网页实际上是由浏览器绘制出来的</li>
+<li>页面上的动态内容，如轮播图。其本质就是浏览器不停的在进行绘制</li>
+<li>帧的概念：10000&#x2F;60   16ms，如果在16ms内完成渲染，那么就会保持60fps，如果超过了16ms，那么就会掉帧，导致卡顿。</li>
+</ol>
+<blockquote>
+<p>浏览器渲染流程</p>
+</blockquote>
+<ol>
+<li><p>Input event handlers</p>
+</li>
+<li><p>RequestsAnimationFrame</p>
+</li>
+<li><p>Parse HTML</p>
+</li>
+<li><p>Recalc Style</p>
+</li>
+<li><p>Layout</p>
+</li>
+<li><p>Update Layer Tree</p>
+</li>
+<li><p>Paint</p>
+</li>
+<li><p>Composite</p>
+</li>
+<li><p>commit -&gt; Raster Scheduled-&gt;Rasterize -&gt;Frame End &#x2F;&#x2F; requestIdleCallback</p>
+</li>
+<li><p>当通过js 或者css修改DOM元素的几何属性（长度、宽度）时，会出发完整的渲染流水线，这种情况称之为 【重排（回流）】</p>
+</li>
+<li><p>当修改的属性不涉及几何属性（字体、颜色）时，会省略掉流水线中的Layout、Layer过程，这种情况称之会【重绘】</p>
+</li>
+<li><p>当修改【不涉及重排、重绘的属性（比如transform）】时，会省略流水线中Layout、Layer、Print过程，仅执行合成线程的绘制工作，这种情况称之会【合成】</p>
+</li>
+</ol>
+<p>按照性能排序： 合成&gt;重绘&gt;重排</p>
+<p>因为浏览器绘制的16ms一帧，但是执行js与渲染流水线实际上是在同一个线程上面执行，也就意味着如果js执行的时间过长。不够及时渲染下一针。也就是页面卡顿</p>
+<p>react V15 以前就会存在这个js执行时间过长的问题。在React中，需要去计算整颗虚拟DOM树，虽然是js层面的计算，想必DOM直接操作节省了很多时间。但每次都要重新计算整颗树，就会造成每一帧js代码的执行时间过长，从而导致动画、还有一些实时更新得不到及时的响应，造成卡顿的效果。</p>
+<blockquote>
+<p>在React15以前的版本，进行两颗虚拟DOM树的对比, 由于使用的事递归，而且这种递归不能被打断，从而造成了js执行时间过长。</p>
+</blockquote>
+<p>这种架构模式，就会不停的开启新的函数栈</p>
+<h2 id="I-O瓶颈"><a href="#I-O瓶颈" class="headerlink" title="I&#x2F;O瓶颈"></a>I&#x2F;O瓶颈</h2><p>对于前端开发来说，最主要的I&#x2F;O瓶颈，就是网络延迟。这个问题是客观存在的。<br>React的方式，就是将人机交互的研究成果，整合到UI中。所有的操作，都是来自于自变量的变化导致的重新渲染，我们只需要针对不同的操作赋予不同的优先级即可。具体有三点</p>
+<ol>
+<li>为不同操作造成的【自变量变化】赋予不同的优先级</li>
+<li>素有优先级统一调度，优先处理【最高优先级的更新】</li>
+<li>如果更新正在进行（进入虚拟DOM相关工作），此时有【更高优先级的更新】产生的话，中断当前的更新，优先处理高优先级的更新。</li>
+</ol>
+<p>要实现这三个点，就需要react底层能实现下面的内容：</p>
+<ol>
+<li>用于调度优先级的调度器</li>
+<li>调度器对应的调度算法</li>
+<li>支持科中断的虚拟DOM的实现</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>所以，不管是解决CPU的瓶颈，还是I&#x2F;O的瓶颈，底层的诉求都是要实现 time slice（时间切片）</p>
+<h1 id="新架构的解决思路"><a href="#新架构的解决思路" class="headerlink" title="新架构的解决思路"></a>新架构的解决思路</h1><h2 id="解决CPU瓶颈"><a href="#解决CPU瓶颈" class="headerlink" title="解决CPU瓶颈"></a>解决CPU瓶颈</h2><p>从React16开始，官方团队正式引入了Fiber的概念，这是一种通过链表来描述UI的方式，本质上你也可以看做是一种虚拟DOM的实现</p>
+<blockquote>
+<p>虚拟DOM，只是一种概念，并不是具体的一种技术。React现在也使用一个名叫 Fiber的内部对象来存放组件树的信息。所以也可以被认为是React中的 virtual DOM 实现的一部分。</p>
+</blockquote>
+<p>Fiber本质上也是一个对象，但和之前不同的是，Fiber使用的链表的结构进行串联，child指向子元素，sibling指向兄弟元素，return指向父元素。</p>
+<p>使用链表这种结果，最大的好处是在进行整棵树对比（reconcile）计算式，这个过程是可以被打断的。<br>在发现一帧时间已经不够，不能够再继续执行JS，需要渲染下一帧的时候，这个时候就会打断JS的执行，龙游县渲染下一帧，渲染完成后再接着回来完成上一次没有执行完的计算。</p>
+<h2 id="解决I-O瓶颈"><a href="#解决I-O瓶颈" class="headerlink" title="解决I&#x2F;O瓶颈"></a>解决I&#x2F;O瓶颈</h2><p>从React 16开始，引入了Scheduler （调度器），用来调度任务的优先级。</p>
+<ul>
+<li><p>React 16之前</p>
+<ul>
+<li>Reconciler（协调器）：vDom的实现，根据自变量的变化，计算出UI的变化</li>
+<li>Renderer（渲染）：负责将UI的变化渲染到宿主环境</li>
+</ul>
+</li>
+<li><p>React 16之后</p>
+<ul>
+<li>Scheduler（调度器）：调度任务的优先级，高优先级的任务会优先进入到Reconciler</li>
+<li>Reconciler（协调器）：vDom的实现，根据自变量的变化，计算出UI的变化</li>
+<li>Renderer（渲染）：负责将UI的变化渲染到宿主环境</li>
+</ul>
+</li>
+</ul>
+<p>新架构中，Reconciler的更新流程也从之前的递归，变成了可中断的循环过程。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">workLoopConcurrent</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">// Perform work until Scheduler asks us to yield</span></span><br><span class="line"><span class="comment">//   如果还有任务，且时间切片还有剩余时间</span></span><br><span class="line">  <span class="keyword">while</span> (workInProgress !== <span class="literal">null</span> &amp;&amp; !<span class="title function_">shouldYield</span>()) &#123;</span><br><span class="line">    <span class="comment">// $FlowFixMe[incompatible-call] found when upgrading Flow</span></span><br><span class="line">    <span class="title function_">performUnitOfWork</span>(workInProgress);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="attr">getCurrentTime</span>: <span class="function">() =&gt;</span> <span class="title class_">DOMHighResTimeStamp</span> = perf.<span class="property">now</span>.<span class="title function_">bind</span>(perf);</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">unstable_shouldYield</span>(<span class="params"></span>): boolean &#123;</span><br><span class="line"><span class="comment">//  当前时间是否大于过期时间</span></span><br><span class="line"><span class="comment">// 其中 deadline = getCurrentTime() + yieldInterval;  // runTask 中的代码</span></span><br><span class="line"><span class="comment">// yieldInterval为调度器预设的时间间隔，默认为5ms</span></span><br><span class="line"> <span class="keyword">return</span> <span class="title function_">getCurrentTime</span>() &gt;= deadline;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次循环都会调用 shouldYield 判断当前的时间切片是否有足够的剩余时间，如果没有足够的剩余时间，就暂停reconciler的执行，将主线程还给渲染流水线，进行下一帧的渲染操作。</p>
+<p>渲染工作完成后，再等待下一个宏任务进行后续代码的执行。</p>
+</div></article><aside class="post-widget"><nav class="post-toc-wrap" id="post-toc"><h4>TOC</h4><ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#react%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="post-toc-number">1.</span> <span class="post-toc-text">react整体架构</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%97%A7%E6%9E%B6%E6%9E%84%E7%9A%84%E9%97%AE%E9%A2%98"><span class="post-toc-number">2.</span> <span class="post-toc-text">旧架构的问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#CPU%E7%93%B6%E9%A2%88"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">CPU瓶颈</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#I-O%E7%93%B6%E9%A2%88"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">I&#x2F;O瓶颈</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%80%BB%E7%BB%93"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">总结</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%96%B0%E6%9E%B6%E6%9E%84%E7%9A%84%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="post-toc-number">3.</span> <span class="post-toc-text">新架构的解决思路</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%A7%A3%E5%86%B3CPU%E7%93%B6%E9%A2%88"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">解决CPU瓶颈</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%A7%A3%E5%86%B3I-O%E7%93%B6%E9%A2%88"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">解决I&#x2F;O瓶颈</span></a></li></ol></li></ol></nav></aside></div><footer class="footer-nav"><div class="footer"><div class="back-top" id="back-top" title="Back to top"><i class="icon icon-chevron-bar-up"></i></div><span class="footer-msg"><div><span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">?</span>
+PV
+</span><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">?</span>
+UV</span></div>
+
+Copyright &copy;
+<span class="time-divide">-</span>2023
+Belial.
+
+Power by
+<a href="https://hexo.io/" target="_blank" rel="external nofollow">Hexo</a>
+and
+<a href="https://github.com/Cerallin/hexo-theme-yuzu" target="_blank" rel="external nofollow" title="v3.1">Theme Yuzu</a>.</span></div></footer><script>window.config = {
+  url_root: '/MoJi-Monkey/',
+  meta_path: 'meta.json',
+};
+</script>
+<script src="/MoJi-Monkey/js/clipboard/clipboard.min.js"></script>
+
+
+<script src="/MoJi-Monkey/js/theme.js"></script>
+
+
+<script src="/MoJi-Monkey/js/index.js"></script>
+
+<script src="/MoJi-Monkey/js/toc.js"></script>
+</div><div class="search-modal" id="search-modal" data-show="false"><div class="card"><div class="card-head"><div class="search-box"><input class="search-input" id="search-input" placeholder="search"/><div class="search-button" id="search-button"><div class="icon icon-search"></div></div></div><div class="close-button"><div class="icon icon-x"></div></div></div><div class="card-body"><div class="search-count">search.total<span id="search-count-num">0</span>search result(s) in total.</div><div class="search-result" id="search-result"></div></div></div></div></body></html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content=""/><meta name="keyword"/><title>MoJo Monkey
+-
+
+</title><link rel="icon" href="/img/favicon.ico"/>
+<link rel="stylesheet" href="/MoJi-Monkey/css/style.css">
+
+<link rel="stylesheet" href="/MoJi-Monkey/css/helpers.css">
+<script async="async" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading-wrapper" data-loading="true"><div class="loading"><span></span><span></span><span></span></div></div><div class="page" data-filter="true"><div class="head" data-show="true"><header class="head-header"><div class="head-author"><a class="head-author-link" href="/MoJi-Monkey/">MoJo Monkey</a></div><div class="head-right"><button class="bar-wrap" id="bar-wrap-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><div class="head-item"><a class="search-button head-item-link"><i class="icon icon-search"></i></a></div><div class="head-item"><a class="head-item-link" href="/MoJi-Monkey/about">About</a></div></div></header>
+<div class="menu-bar-head" id="menu-bar" data-show="false"><ul class="menu-bar-ul"><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts/"><span>Posts1</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/categories/Posts2/"><span>Posts2</span></a></li><li class="menu-bar-item  border"><a href="/MoJi-Monkey/archives"><span>Archives</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/tags"><span>Tags</span></a></li><li class="menu-bar-item"><a class="search-button"><span>Search</span></a></li><li class="menu-bar-item"><a href="/MoJi-Monkey/about"><span>About</span></a></li></ul></div></div><div class="main"><article class="post" id="post"><header class="post-head"><h1 class="post-title"><a class="title" href="/MoJi-Monkey/2023/09/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/React/%E5%BC%82%E6%AD%A5%E6%B8%B2%E6%9F%93/">异步渲染</a></h1></header><div class="post-datetag"><div class="post-date"><time class="post-time" itemprop="datePublished" title="2023-09-19 19:04:53" datetime="2023-09-19T11:04:53.000Z">2023-09-19</time></div>|<div class="post-tag"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/react/" rel="tag">react</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/suspense/" rel="tag">suspense</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/MoJi-Monkey/tags/time-slicing/" rel="tag">time slicing</a></li></ul></div>|
+<div class="post-visit"><span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>hits</span></div></div><div class="post-word-count">本文共426字。</div><div class="article-entry" itemprop="articleBody"><h2 id="1-时间切片-time-slicing"><a href="#1-时间切片-time-slicing" class="headerlink" title="1. 时间切片 time slicing"></a>1. 时间切片 time slicing</h2><p>在react渲染的时候，会将任务拆成多个小任务，这些细分的任务，则会在主线程空闲的时候执行，在执行任务的期间，随时可以进行暂停。</p>
+<p>当然，使用时间切片的缺点，是任务的总时间变长了，因为它每处理完一个小任务后，主线程会空闲出来，并且在下一个小任务开始处理之前，有一小段的延迟。为了避免浏览器卡死，这种取舍就显得必要。</p>
+<p>这里有个远程的API， requestIdleCallback， </p>
+<ul>
+<li>react是使用了原生的API，但是对它进行了一定程度的封装和优化，react的调度器，（scheduler）模块就是基于requestIdleCallback实现的。它可以根据任务的优先级来安排执行实现，从而提高性能和用户体验。</li>
+<li>对于不支持的浏览器，也使用了setTimeout来模拟，使用MessageChannel来实现微任务队列，</li>
+</ul>
+<h2 id="2-悬停或者暂停（suspense）"><a href="#2-悬停或者暂停（suspense）" class="headerlink" title="2. 悬停或者暂停（suspense）"></a>2. 悬停或者暂停（suspense）</h2><p>调用 render -》 发现有异步请求-》 悬停<br>等待异步请求结果-》 再渲染展示数据</p>
+<p>细化流程</p>
+<ol>
+<li>在render函数中，我们可以写入一个异步请求，请求数据</li>
+<li>render会从我们缓存中读取这个缓存</li>
+<li>如果有缓存，那直接正常进行render</li>
+<li>如果没有缓存，那么会抛出一个异常，这个异常是一个promise<ul>
+<li>为什么要用异常来实现？</li>
+<li>这个异常会被react捕获，然后react会暂停渲染，等待异步请求结果</li>
+</ul>
+</li>
+<li>当这个Promise完成后，react会继续回到原来的render中，也就是重新执行一遍，把数据render出来</li>
+</ol>
+</div></article><aside class="post-widget"><nav class="post-toc-wrap" id="post-toc"><h4>TOC</h4><ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#1-%E6%97%B6%E9%97%B4%E5%88%87%E7%89%87-time-slicing"><span class="post-toc-number">1.</span> <span class="post-toc-text">1. 时间切片 time slicing</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#2-%E6%82%AC%E5%81%9C%E6%88%96%E8%80%85%E6%9A%82%E5%81%9C%EF%BC%88suspense%EF%BC%89"><span class="post-toc-number">2.</span> <span class="post-toc-text">2. 悬停或者暂停（suspense）</span></a></li></ol></nav></aside></div><footer class="footer-nav"><div class="footer"><div class="back-top" id="back-top" title="Back to top"><i class="icon icon-chevron-bar-up"></i></div><span class="footer-msg"><div><span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">?</span>
+PV
+</span><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">?</span>
+UV</span></div>
+
+Copyright &copy;
+<span class="time-divide">-</span>2023
+Belial.
+
+Power by
+<a href="https://hexo.io/" target="_blank" rel="external nofollow">Hexo</a>
+and
+<a href="https://github.com/Cerallin/hexo-theme-yuzu" target="_blank" rel="external nofollow" title="v3.1">Theme Yuzu</a>.</span></div></footer><script>window.config = {
+  url_root: '/MoJi-Monkey/',
+  meta_path: 'meta.json',
+};
+</script>
+<script src="/MoJi-Monkey/js/clipboard/clipboard.min.js"></script>
+
+
+<script src="/MoJi-Monkey/js/theme.js"></script>
+
+
+<script src="/MoJi-Monkey/js/index.js"></script>
+
+<script src="/MoJi-Monkey/js/toc.js"></script>
+</div><div class="search-modal" id="search-modal" data-show="false"><div class="card"><div class="card-head"><div class="search-box"><input class="search-input" id="search-input" placeholder="search"/><div class="search-button" id="search-button"><div class="icon icon-search"></div></div></div><div class="close-button"><div class="icon icon-x"></div></div></div><div class="card-body"><div class="search-count">search.total<span id="search-count-num">0</span>search result(s) in total.</div><div class="search-result" id="search-result"></div></div></div></div></body></html>
